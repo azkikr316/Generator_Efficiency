@@ -37,22 +37,67 @@ python Alternator_Efficiency_kWm_to_kWe_GUI.py
 
 ---
 
-### 4️⃣ Build `.exe` (Optional for Windows)
-Requires **PyInstaller**  
+## 📦 **Build `.exe` with PyInstaller**
+Requires **PyInstaller**:
+
 ```bash
 pip install pyinstaller
 ```
 
-**Build Command:**
+### ✅ Safer Build (Recommended)
 ```bash
-pyinstaller --noconsole --onefile --icon=black.ico --version-file=version.txt Alternator_Efficiency_kWm_to_kWe_GUI.py
+pyinstaller --noconfirm --windowed --onedir ^
+  --icon=black.ico ^
+  --version-file=version.txt ^
+  Alternator_Efficiency_kWm_to_kWe_GUI.py
 ```
-The `.exe` will appear in the `dist/` folder.
+
+The `.exe` will appear in the `dist/Alternator_Efficiency_kWm_to_kWe_GUI/` directory.  
+This method avoids antivirus false positives caused by temp file unpacking in `--onefile`.
 
 ---
 
-## 📝 **Sample Screenshot**
-> *Insert screenshot of your GUI here if available*
+## 🔐 **Self-Sign the EXE (Optional)**
+
+You can self-sign the executable to reduce security warnings using OpenSSL and `osslsigncode`.
+
+### 🛠 1. Generate Self-Signed Certificate
+```bash
+openssl req -new -newkey rsa:2048 -nodes -x509 -days 365 \
+  -keyout my_private.key -out my_cert.crt
+```
+
+### 🔐 2. Create `.p12` Package
+```bash
+openssl pkcs12 -export -out my_cert.p12 \
+  -inkey my_private.key -in my_cert.crt
+```
+
+### ✍️ 3. Sign the Executable
+```bash
+osslsigncode sign \
+  -pkcs12 my_cert.p12 \
+  -pass your_password \
+  -n "Alternator Efficiency GUI" \
+  -i "https://daikai.com" \
+  -t http://timestamp.digicert.com \
+  -in dist/Alternator_Efficiency_kWm_to_kWe_GUI/Alternator_Efficiency_kWm_to_kWe_GUI.exe \
+  -out dist/Alternator_Efficiency_kWm_to_kWe_GUI/Alternator_Efficiency_kWm_to_kWe_signed.exe
+```
+
+---
+
+### ✅ Verify the Signature (Linux)
+```bash
+osslsigncode verify dist/.../your_signed.exe
+```
+
+### ✅ Verify on Windows
+```powershell
+Get-AuthenticodeSignature .\your_signed.exe
+```
+
+If `Status` shows `UnknownError`, import the `my_cert.crt` into the **Windows Trusted Root Certification Authorities** to trust the self-signed cert.
 
 ---
 
@@ -62,8 +107,17 @@ The `.exe` will appear in the `dist/` folder.
 ├─ Alternator_Efficiency_kWm_to_kWe_GUI.py
 ├─ black.ico
 ├─ version.txt
+├─ my_cert.crt
+├─ my_cert.p12
+├─ my_private.key
 └─ README.md
 ```
+
+---
+
+## 🖼️ **Sample Screenshot**
+<img width="398" height="329" alt="image" src="https://github.com/user-attachments/assets/0a44c34b-76b7-493c-a15c-dc0cefae9274" />
+
 
 ---
 
@@ -71,8 +125,8 @@ The `.exe` will appear in the `dist/` folder.
 ✅ Simple & Lightweight  
 ✅ GUI-based (No terminal needed)  
 ✅ Engineering-friendly  
-✅ Ready for `.exe` distribution  
-✅ Includes version info, icon, and metadata
+✅ Includes version info, icon, and metadata  
+✅ Optionally signed `.exe` for improved trustworthiness
 
 ---
 
